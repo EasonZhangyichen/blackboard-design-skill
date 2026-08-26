@@ -11,7 +11,7 @@ TESTS = ROOT / "evals" / "test-cases.yaml"
 REQUIRED_FILES = [
     ROOT / "README.md",
     ROOT / "CHANGELOG.md",
-    ROOT / "LICENSE-DECISION.md",
+    ROOT / "LICENSE",
     DIST_SKILL,
     ROOT / "dist" / "WEB-QUICK-PROMPT.md",
     ROOT / "docs" / "IMAGE-GRAMMAR-v1.1.md",

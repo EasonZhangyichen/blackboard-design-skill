@@ -112,8 +112,8 @@ git remote -v
 
 ## 五、公开前必须完成
 
-1. 确定 `LICENSE`；
-2. 删除或处理 `LICENSE-DECISION.md`；
+1. 确认 `LICENSE` 与版权信息；
+2. 确认 README 的许可证声明与 `LICENSE` 一致；
 3. 确认无 API Key、邮箱、真实学校隐私材料；
 4. 完成至少四个平台回归测试；
 5. 创建标签与 Release。

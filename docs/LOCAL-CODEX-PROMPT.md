@@ -13,7 +13,7 @@
 
 ## 执行步骤
 
-1. 阅读根目录 `SKILL.md`、`README.md`、`CHANGELOG.md`、`LICENSE-DECISION.md` 和 `docs/` 下发布说明。
+1. 阅读根目录 `SKILL.md`、`README.md`、`CHANGELOG.md`、`LICENSE` 和 `docs/` 下发布说明。
 2. 确认核心版本均为 `v0.7.1`，不存在 `v0.7.0` 发行文件残留。
 3. 运行：
 
@@ -23,7 +23,7 @@
    ```
 
 4. 检查：
-   - 根目录必须包含 `SKILL.md`；
+   - 根目录必须包含 `SKILL.md` 和 `LICENSE`；
    - 主包不得包含普通参考图片；
    - 不得出现 `/workspace/`、`/mnt/data/` 等不可移植路径；
    - 不得包含 `.env`、API Key、Token 或本地缓存；
@@ -49,13 +49,12 @@
     - 当前 commit SHA；
     - 验证脚本结果；
     - Release ZIP 路径；
-    - 是否存在仍需我决定的许可证问题。
+    - MIT License 是否存在且内容完整。
 
 ## 禁止事项
 
 - 不要把仓库设为 public；
 - 不要创建 GitHub Release；
-- 不要选择许可证；
+- 不要修改或移除 MIT License；
 - 不要上传参考案例图片；
 - 不要修改 Skill 的产品逻辑，除非验证脚本发现确定性错误；
-- 不要删除 `LICENSE-DECISION.md`。

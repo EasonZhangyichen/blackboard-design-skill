@@ -73,7 +73,7 @@ blackboard-design-skill/
 ├── SKILL.md
 ├── README.md
 ├── CHANGELOG.md
-├── LICENSE-DECISION.md
+├── LICENSE
 ├── .gitignore
 ├── dist/
 │   ├── WEB-QUICK-PROMPT.md
@@ -118,4 +118,4 @@ python3 scripts/build_release.py
 
 ## 许可证
 
-公开发布前请阅读 `LICENSE-DECISION.md`。在没有正式 `LICENSE` 之前，仓库虽然可以公开查看，但不应宣传为已经完成开源授权。
+本项目采用 [MIT License](LICENSE)。
