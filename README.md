@@ -100,21 +100,7 @@ python3 scripts/validate_package.py
 python3 scripts/build_release.py
 ```
 
-## GitHub 发布
 
-当前建议先创建 **private** 仓库，完成复核与实测后再改为 public。完整步骤见：
-
-- `docs/PUBLISH-TO-GITHUB.md`
-- `docs/LOCAL-CODEX-PROMPT.md`
-
-## 为什么主包不附普通参考图
-
-1. 核心 Skill 必须单文件独立工作；
-2. 一般参考图会形成不必要的审美锚定；
-3. 图片存在来源、版权和质量分层问题；
-4. 案例更适合内部蒸馏、回归评测和未来精选 Showcase。
-
-未来只有达到作者认可的审美上限、来源清楚且有展示权限的“黄金案例”，才适合放入单独的 `showcase/`，且仍不作为运行依赖。
 
 ## 许可证
 
