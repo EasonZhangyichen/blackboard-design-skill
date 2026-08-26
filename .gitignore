@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+
+# Generated test outputs
+outputs/
+tmp/
+
+# Built release archives
+dist/*.zip
