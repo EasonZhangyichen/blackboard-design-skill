@@ -1,0 +1,105 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - VERSION
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out project
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+
+      - name: Install validation dependencies
+        run: python -m pip install "PyYAML>=6,<7"
+
+      - name: Validate tracked source and release contract
+        run: |
+          git ls-files --error-unmatch "dist/blackboard-design-skill-v$(cat VERSION).md" >/dev/null
+          python tools/build_portable.py --check
+          python tools/validate_package.py
+          python -m unittest discover -s tests
+
+      - name: Build release assets
+        run: |
+          python tools/build_release.py
+          python tools/build_checksums.py
+
+      - name: Build release notes from CHANGELOG
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from textwrap import dedent
+
+          version = Path("VERSION").read_text(encoding="utf-8").strip()
+          changelog = Path("CHANGELOG.md").read_text(encoding="utf-8")
+          heading = f"## [{version}]"
+          start = changelog.find(heading)
+          if start < 0:
+              raise SystemExit(f"Missing {heading} in CHANGELOG.md")
+          remainder = changelog[start:]
+          next_heading = remainder.find("\n## [", len(heading))
+          section = remainder if next_heading < 0 else remainder[:next_heading]
+          body = dedent(
+              f"""\
+              # Blackboard Design Skill v{version}
+
+              面向中国大陆小学、初中和高中教师的黑板报整图生成 Skill，由 **奕思 Geek&Chalk** 维护。
+
+              {section}
+
+              ## 下载建议
+
+              - 普通教师：下载 `blackboard-design-skill-v{version}.md`；
+              - Agent / 技术用户：下载 `blackboard-design-skill-v{version}.zip`；
+              - 网页图片模式：使用 `WEB-QUICK-PROMPT.md`；
+              - 完整性校验：下载 `SHA256SUMS.txt`。
+
+              不同平台最终画质取决于实际规划模型、图片模型和工具权限。
+              """
+          )
+          Path("dist/RELEASE_NOTES.md").write_text(body.strip() + "\n", encoding="utf-8")
+          PY
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="$(cat VERSION)"
+          TAG="v${VERSION}"
+          TITLE="奕思 Geek&Chalk｜Blackboard Design Skill ${TAG}"
+          ASSETS=(
+            "dist/blackboard-design-skill-v${VERSION}.md"
+            "dist/blackboard-design-skill-v${VERSION}.zip"
+            "dist/WEB-QUICK-PROMPT.md"
+            "dist/SHA256SUMS.txt"
+          )
+
+          if gh release view "${TAG}" >/dev/null 2>&1; then
+            gh release upload "${TAG}" "${ASSETS[@]}" --clobber
+            gh release edit "${TAG}" --title "${TITLE}" --notes-file dist/RELEASE_NOTES.md
+          else
+            gh release create "${TAG}" "${ASSETS[@]}" \
+              --title "${TITLE}" \
+              --notes-file dist/RELEASE_NOTES.md
+          fi

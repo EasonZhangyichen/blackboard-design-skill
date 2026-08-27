@@ -15,12 +15,6 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL_NAME = "blackboard-design-skill"
-REFERENCES = {
-    "pedagogy-and-stages.md",
-    "image-grammar.md",
-    "generation-protocol.md",
-    "writing-and-compliance.md",
-}
 TEXT_SUFFIXES = {".md", ".py", ".yaml", ".yml", ".txt", ".toml", ""}
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".svg"}
 APPROVED_IMAGES = {
@@ -43,21 +37,15 @@ CORE_MARKERS = (
     "B_enhanced_",
     "C_simplified_",
     "每次图片调用都完整写入",
-    "通用负面约束",
+    "弱模型必带的负面约束",
     "文字真值稿",
     "图中文字核验",
     "想替换什么",
-    "重新执行路由",
+    "重大变化必须重新路由",
     "局部放大与可打印素材",
     "150—300字设计理念",
-    "准确性、版权与符号",
+    "合规与准确",
     "交付前质量门",
-)
-PORTABLE_ANCHORS = (
-    "portable-reference-pedagogy-and-stages",
-    "portable-reference-image-grammar",
-    "portable-reference-generation-protocol",
-    "portable-reference-writing-and-compliance",
 )
 
 
@@ -99,25 +87,26 @@ def validate_metadata() -> None:
     description = metadata.get("description")
     if not isinstance(description, str) or not 1 <= len(description) <= 1024:
         fail("Skill description must contain 1-1024 characters")
+    compatibility = metadata.get("compatibility")
+    if not isinstance(compatibility, str) or not 1 <= len(compatibility) <= 500:
+        fail("Skill compatibility must contain 1-500 characters")
     values = metadata.get("metadata")
     if not isinstance(values, dict) or not all(isinstance(value, str) for value in values.values()):
         fail("Skill metadata values must be strings")
     if values.get("version") != version:
         fail("VERSION and Skill metadata version differ")
-    if len(skill_text.splitlines()) > 500:
-        fail("SKILL.md exceeds 500 lines")
-    if "## 参考文件加载规则" not in skill_text:
-        fail("SKILL.md is missing the mandatory reference loading rule")
-
-    references = ROOT / "references"
-    actual = {path.name for path in references.iterdir() if path.is_file()}
-    if actual != REFERENCES:
-        fail(f"references must contain exactly: {', '.join(sorted(REFERENCES))}")
-    if any(path.is_dir() for path in references.iterdir()):
-        fail("references must not contain nested directories")
-    for filename in REFERENCES:
-        if f"references/{filename}" not in skill_text:
-            fail(f"SKILL.md does not link references/{filename}")
+    line_count = len(skill_text.splitlines())
+    if line_count > 500:
+        print(
+            f"Validation warning: SKILL.md contains {line_count} lines; "
+            "the full self-contained runtime is intentionally retained.",
+            file=sys.stderr,
+        )
+    if "references/" in skill_text or "## 参考文件加载规则" in skill_text:
+        fail("SKILL.md must run without external references")
+    for marker in CORE_MARKERS:
+        if marker not in skill_text:
+            fail(f"SKILL.md is missing core rule: {marker}")
 
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
@@ -181,27 +170,16 @@ def validate_repository_hygiene() -> None:
 def validate_generated_files() -> None:
     version = current_version()
     result = subprocess.run(
-        [sys.executable, "tools/build_portable.py"],
+        [sys.executable, "tools/build_portable.py", "--check"],
         cwd=ROOT,
         check=False,
     )
     if result.returncode:
-        fail("Portable distribution could not be built")
+        fail("Committed single-file distribution is missing or stale")
 
-    portable = ROOT / "dist" / f"blackboard-design-skill-portable-v{version}.md"
-    portable_metadata, portable_text = parse_frontmatter(portable)
-    if portable_metadata.get("name") != SKILL_NAME:
-        fail("Portable Skill name is invalid")
-    if "Portable 单文件说明" not in portable_text:
-        fail("Portable distribution is missing its embedded-reference notice")
-    if "(references/" in portable_text:
-        fail("Portable distribution still contains external reference links")
-    for anchor in PORTABLE_ANCHORS:
-        if f'id="{anchor}"' not in portable_text or f"](#{anchor})" not in portable_text:
-            fail(f"Portable distribution is missing internal reference anchor: {anchor}")
-    for marker in CORE_MARKERS:
-        if marker not in portable_text:
-            fail(f"Portable distribution is missing core rule: {marker}")
+    single_file = ROOT / "dist" / f"blackboard-design-skill-v{version}.md"
+    if single_file.read_bytes() != (ROOT / "SKILL.md").read_bytes():
+        fail("Single-file distribution differs from SKILL.md")
 
     release_result = subprocess.run(
         [sys.executable, "tools/build_release.py"],
@@ -211,15 +189,35 @@ def validate_generated_files() -> None:
     if release_result.returncode:
         fail("Standard release archive could not be built")
     archive_path = ROOT / "dist" / f"{SKILL_NAME}-v{version}.zip"
-    allowed = {"SKILL.md", "LICENSE", "references", "agents"}
     with ZipFile(archive_path) as archive:
         names = archive.namelist()
-    if not names or any(not name.startswith(f"{SKILL_NAME}/") for name in names):
-        fail("Standard release archive has an invalid top-level directory")
-    for name in names:
-        relative = Path(name).relative_to(SKILL_NAME)
-        if relative.parts[0] not in allowed:
-            fail(f"Unexpected file in standard release archive: {relative}")
+    expected = [
+        f"{SKILL_NAME}/SKILL.md",
+        f"{SKILL_NAME}/LICENSE",
+        f"{SKILL_NAME}/agents/openai.yaml",
+    ]
+    if names != expected:
+        fail("Standard release archive must contain only SKILL.md, LICENSE, and agents/openai.yaml")
+
+    checksum_result = subprocess.run(
+        [sys.executable, "tools/build_checksums.py"],
+        cwd=ROOT,
+        check=False,
+    )
+    if checksum_result.returncode:
+        fail("Release checksums could not be built")
+    checksum_file = ROOT / "dist" / "SHA256SUMS.txt"
+    expected_assets = (
+        single_file,
+        archive_path,
+        ROOT / "dist" / "WEB-QUICK-PROMPT.md",
+    )
+    expected_lines = [
+        f"{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}" for path in expected_assets
+    ]
+    actual_lines = checksum_file.read_text(encoding="utf-8").splitlines()
+    if actual_lines != expected_lines:
+        fail("SHA256SUMS.txt does not match the release assets")
 
 
 def main() -> int:

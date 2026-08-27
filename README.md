@@ -2,7 +2,7 @@
 
 由奕思 Geek&Chalk 推出的教师 Agent Skill，用于设计中国大陆小学、初中和高中的真实黑板报、班级主题板报、拼贴黑板与软板展板。
 
-当前版本：**v0.7.2｜公开发布工程加固版（Public Release Candidate）**。项目仍处于公开测试阶段。
+当前版本：**v0.7.3｜完整自包含运行恢复版**。项目仍处于公开测试阶段。
 
 ## 公众号
 
@@ -42,22 +42,22 @@
 
 多数教师不需要学习 GitHub，也不需要理解仓库结构。
 
-1. 下载 `blackboard-design-skill-portable-v0.7.2.md`；
+1. 下载 `blackboard-design-skill-v0.7.3.md`；
 2. 把这个文件上传到 Codex、WorkBuddy、千问工作台、豆包、Kimi 或其他支持文件读取的 AI；
 3. 告诉 AI：“请加载这个黑板报 Skill，并为〔学段〕设计〔主题〕黑板报，板面采用〔传统黑板／黑板加剪贴／软板〕。”
 4. 当前会话需要具备图片生成能力；只有文字能力时，Skill 会输出完整方案与生图提示词。
 
-**不要把根目录的标准入口版 `SKILL.md` 单独发给只支持单文件的平台。**它需要同时读取 `references/`。单文件传播应使用 Portable 文件。
+教师单文件、标准 ZIP 和仓库根目录 `SKILL.md` 使用同一份完整运行规则，不需要额外加载 `references/`。
 
 ## 快速开始
 
 ### 标准 Agent Skill 包
 
-从 [Releases](https://github.com/EasonZhangyichen/blackboard-design-skill/releases) 下载 `blackboard-design-skill-v0.7.2.zip`，导入支持 Agent Skills 目录或 ZIP 的平台。标准 ZIP 包含主 `SKILL.md`、四份专业参考规则、许可证和 OpenAI 展示配置。
+从 [Releases](https://github.com/EasonZhangyichen/blackboard-design-skill/releases) 下载 `blackboard-design-skill-v0.7.3.zip`，导入支持 Agent Skills 目录或 ZIP 的平台。标准 ZIP 包含完整 `SKILL.md`、许可证和 OpenAI 展示配置。
 
-### Portable 单文件
+### 教师完整单文件
 
-下载 `blackboard-design-skill-portable-v0.7.2.md`。它由标准版自动构建，已经内嵌全部专业规则，适合只能上传一个文件的平台，也是面向普通教师的首选传播物。
+下载 `blackboard-design-skill-v0.7.3.md`。它与仓库根目录 `SKILL.md` 内容完全一致，适合只能上传一个文件的平台，也是面向普通教师的首选传播物。
 
 ### 网页图片模式
 
@@ -67,14 +67,26 @@
 
 > 使用黑板报 Skill，为高一设计“古韵传薪火 经典启新思”主题黑板报，采用传统手绘黑板，一键生成。
 
+### Release 完整性校验
+
+每个正式 Release 同时提供 `SHA256SUMS.txt`。下载发行文件后，可核对文件是否与发布版本一致：
+
+```bash
+# Linux
+sha256sum -c SHA256SUMS.txt
+
+# macOS
+shasum -a 256 -c SHA256SUMS.txt
+```
+
 ### 通过 GitHub 仓库地址安装
 
 部分 Agent 可以读取或安装 GitHub 仓库，但这不是所有平台的通用能力。只有在平台明确支持“从仓库／URL安装 Skill”或能够克隆仓库时，才适合直接发送仓库地址。
 
-- 支持仓库安装：可让 Agent 读取仓库根目录 `SKILL.md` 与 `references/`；
-- 只支持上传文件：使用 Portable 单文件；
+- 支持仓库安装：让 Agent 读取仓库根目录 `SKILL.md`；
+- 只支持上传文件：使用教师完整单文件；
 - 支持 ZIP 导入：使用标准 Release ZIP；
-- 普通网页聊天：先进入图片生成模式，再使用 Portable 或网页快速提示词。
+- 普通网页聊天：先进入图片生成模式，再使用完整单文件或网页快速提示词。
 
 不要只发送仓库首页并假设所有 AI 都会递归读取、安装和启用图片工具。
 
@@ -86,7 +98,7 @@
 |---|---|---|
 | Codex、Claude Code、TRAE 等 Agent | 导入标准包或完整目录 | 当前 Agent 具备图片生成或编辑工具 |
 | WorkBuddy / CodeBuddy 等工作台 | 导入 Skill；可按个人环境配置模型或工具 | 内置图片能力、MCP、连接器或外部图像 API 可用 |
-| 千问、豆包、Kimi 等网页产品 | 上传 Portable 文件或使用快速提示词 | 先进入平台的图片生成入口 |
+| 千问、豆包、Kimi 等网页产品 | 上传完整单文件或使用快速提示词 | 先进入平台的图片生成入口 |
 
 本 Skill 不强制使用 GPT Image 2 或任何指定图片模型。模型与工具配置属于使用者和宿主平台的选择。详见 [`docs/PLATFORM-GUIDE.md`](docs/PLATFORM-GUIDE.md)。
 
@@ -107,11 +119,11 @@
 blackboard-design-skill/
 ├── SKILL.md
 ├── assets/
-├── references/
 ├── agents/openai.yaml
 ├── dist/
 ├── docs/
 ├── evals/
+├── maintainers/
 ├── tests/
 ├── tools/
 ├── BRAND.md
@@ -119,18 +131,19 @@ blackboard-design-skill/
 └── LICENSE
 ```
 
-标准发布 ZIP 只包含运行所需的 `SKILL.md`、`LICENSE`、`references/` 和 `agents/`。Portable 单文件与 ZIP 均由构建工具生成，不单独维护。
+标准发布 ZIP 只包含 `SKILL.md`、`LICENSE` 和 `agents/openai.yaml`。教师单文件与 ZIP 均从根目录 `SKILL.md` 构建，三种入口使用同一套完整运行逻辑。v0.7.2 的模块化参考文档保留在 `docs/modular-v0.7.2/`，不作为运行前提。
 
 ## 验证与构建
 
 ```bash
+python3 tools/build_portable.py --check
 python3 tools/validate_package.py
 python3 -m unittest discover -s tests
-python3 tools/build_portable.py
 python3 tools/build_release.py
+python3 tools/build_checksums.py
 ```
 
-CI 还会运行 Agent Skills 官方参考验证器、YAML 解析、版本一致性、敏感信息和图片文件检查，并分别验证标准包与 Portable 单文件。
+CI 会运行 Agent Skills 官方参考验证器、YAML 解析、版本一致性、敏感信息、批准图片和发行契约检查，并分别验证标准包与教师完整单文件。`main` 分支中的 `VERSION` 变化会触发受控 Release 工作流，生成版本标签、发布说明、发行附件与 SHA-256 校验文件。
 
 ## 贡献
 

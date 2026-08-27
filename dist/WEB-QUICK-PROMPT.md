@@ -1,6 +1,6 @@
 # 网页图片模式快速提示词
 
-Blackboard Design Skill v0.7.2｜奕思 Geek&Chalk
+Blackboard Design Skill v0.7.3｜奕思 Geek&Chalk
 项目：https://github.com/EasonZhangyichen/blackboard-design-skill
 
 请生成一份中国大陆学校真实可用的黑板报，而不是普通海报、PPT或宣传横幅。

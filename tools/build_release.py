@@ -12,10 +12,6 @@ SKILL_NAME = "blackboard-design-skill"
 FILES = (
     Path("SKILL.md"),
     Path("LICENSE"),
-    Path("references/pedagogy-and-stages.md"),
-    Path("references/image-grammar.md"),
-    Path("references/generation-protocol.md"),
-    Path("references/writing-and-compliance.md"),
     Path("agents/openai.yaml"),
 )
 

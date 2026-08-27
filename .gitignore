@@ -14,5 +14,7 @@ outputs/
 tmp/
 
 # Generated release artifacts
+# The versioned teacher .md is intentionally tracked and must match SKILL.md.
 dist/*.zip
-dist/blackboard-design-skill-portable-v*.md
+dist/SHA256SUMS.txt
+dist/RELEASE_NOTES.md
