@@ -4,11 +4,12 @@
 
 ## 验证
 
-- [ ] `python3 tools/build_portable.py`
+- [ ] `python3 tools/build_portable.py --check`
 - [ ] `python3 tools/validate_package.py`
 - [ ] `python3 -m unittest discover -s tests`
 - [ ] `python3 tools/build_release.py`
-- [ ] 未加入学生隐私、密钥、未授权材料或图片文件
+- [ ] `python3 tools/build_checksums.py`
+- [ ] 未加入学生隐私、密钥、未授权材料或未批准图片文件
 
 ## 兼容性
 

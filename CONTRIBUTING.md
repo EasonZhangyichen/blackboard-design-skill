@@ -11,15 +11,17 @@
 1. 从 `main` 创建独立分支。
 2. 保持修改范围清楚，不混入无关重构。
 3. 修改运行逻辑时只更新根目录 `SKILL.md`，并在 `evals/test-cases.yaml` 补充场景，在 `evals/rubric.md` 记录评测标准；评测结果应说明用例、得分、失败项和使用的平台能力。
-4. 运行：
+4. 更新 `SKILL.md` 后，先运行 `python3 tools/build_portable.py` 生成并提交同版本的教师完整单文件。
+5. 提交前运行：
 
    ```bash
-   python3 tools/build_portable.py
+   python3 tools/build_portable.py --check
    python3 tools/validate_package.py
    python3 -m unittest discover -s tests
    python3 tools/build_release.py
+   python3 tools/build_checksums.py
    ```
 
-5. 提交 Pull Request，说明动机、变更和验证结果。
+6. 提交 Pull Request，说明动机、变更、兼容性影响和验证结果。
 
-`dist/blackboard-design-skill-v*.md` 是由根目录 `SKILL.md` 生成的教师完整单文件，不应手工修改。发布 ZIP 同样由构建脚本生成，不提交到源码分支。正式 Release 由维护者从同一运行真源构建并附加这些产物。
+`dist/blackboard-design-skill-v*.md` 是由根目录 `SKILL.md` 生成的教师完整单文件，不应手工修改。发布 ZIP、校验文件和发布说明均由构建或 Release 工作流生成。正式 Release 由维护者从同一运行真源发布。

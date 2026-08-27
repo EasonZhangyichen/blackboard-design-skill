@@ -47,6 +47,8 @@ CORE_MARKERS = (
     "合规与准确",
     "交付前质量门",
 )
+
+
 def fail(message: str) -> None:
     raise AssertionError(message)
 
@@ -85,6 +87,9 @@ def validate_metadata() -> None:
     description = metadata.get("description")
     if not isinstance(description, str) or not 1 <= len(description) <= 1024:
         fail("Skill description must contain 1-1024 characters")
+    compatibility = metadata.get("compatibility")
+    if not isinstance(compatibility, str) or not 1 <= len(compatibility) <= 500:
+        fail("Skill compatibility must contain 1-500 characters")
     values = metadata.get("metadata")
     if not isinstance(values, dict) or not all(isinstance(value, str) for value in values.values()):
         fail("Skill metadata values must be strings")
@@ -165,12 +170,12 @@ def validate_repository_hygiene() -> None:
 def validate_generated_files() -> None:
     version = current_version()
     result = subprocess.run(
-        [sys.executable, "tools/build_portable.py"],
+        [sys.executable, "tools/build_portable.py", "--check"],
         cwd=ROOT,
         check=False,
     )
     if result.returncode:
-        fail("Single-file distribution could not be built")
+        fail("Committed single-file distribution is missing or stale")
 
     single_file = ROOT / "dist" / f"blackboard-design-skill-v{version}.md"
     if single_file.read_bytes() != (ROOT / "SKILL.md").read_bytes():
@@ -193,6 +198,26 @@ def validate_generated_files() -> None:
     ]
     if names != expected:
         fail("Standard release archive must contain only SKILL.md, LICENSE, and agents/openai.yaml")
+
+    checksum_result = subprocess.run(
+        [sys.executable, "tools/build_checksums.py"],
+        cwd=ROOT,
+        check=False,
+    )
+    if checksum_result.returncode:
+        fail("Release checksums could not be built")
+    checksum_file = ROOT / "dist" / "SHA256SUMS.txt"
+    expected_assets = (
+        single_file,
+        archive_path,
+        ROOT / "dist" / "WEB-QUICK-PROMPT.md",
+    )
+    expected_lines = [
+        f"{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}" for path in expected_assets
+    ]
+    actual_lines = checksum_file.read_text(encoding="utf-8").splitlines()
+    if actual_lines != expected_lines:
+        fail("SHA256SUMS.txt does not match the release assets")
 
 
 def main() -> int:

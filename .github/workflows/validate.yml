@@ -7,26 +7,31 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Check out project
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.12"
 
       - name: Install validation dependencies
         run: python -m pip install "PyYAML>=6,<7"
 
-      - name: Build complete single-file distribution
-        run: python tools/build_portable.py
+      - name: Confirm versioned single-file distribution is tracked
+        run: git ls-files --error-unmatch "dist/blackboard-design-skill-v$(cat VERSION).md" >/dev/null
 
       - name: Confirm committed single-file distribution is current
-        run: git diff --exit-code -- "dist/blackboard-design-skill-v$(cat VERSION).md"
+        run: python tools/build_portable.py --check
 
       - name: Run repository validator
         run: python tools/validate_package.py
@@ -34,11 +39,13 @@ jobs:
       - name: Run release contract tests
         run: python -m unittest discover -s tests
 
-      - name: Build standard release archive
-        run: python tools/build_release.py
+      - name: Build standard release archive and checksums
+        run: |
+          python tools/build_release.py
+          python tools/build_checksums.py
 
       - name: Check out Agent Skills reference validator
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: agentskills/agentskills
           ref: 69ef37e9424c0a7ea9dd2293b559e43ec8176379
@@ -55,7 +62,7 @@ jobs:
 
       - name: Validate complete single-file Skill with skills-ref
         run: |
-          mkdir -p .portable-check/blackboard-design-skill
+          mkdir -p .single-file-check/blackboard-design-skill
           cp "dist/blackboard-design-skill-v$(cat VERSION).md" \
-             .portable-check/blackboard-design-skill/SKILL.md
-          skills-ref validate .portable-check/blackboard-design-skill
+             .single-file-check/blackboard-design-skill/SKILL.md
+          skills-ref validate .single-file-check/blackboard-design-skill

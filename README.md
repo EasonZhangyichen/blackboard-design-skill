@@ -67,6 +67,18 @@
 
 > 使用黑板报 Skill，为高一设计“古韵传薪火 经典启新思”主题黑板报，采用传统手绘黑板，一键生成。
 
+### Release 完整性校验
+
+每个正式 Release 同时提供 `SHA256SUMS.txt`。下载发行文件后，可核对文件是否与发布版本一致：
+
+```bash
+# Linux
+sha256sum -c SHA256SUMS.txt
+
+# macOS
+shasum -a 256 -c SHA256SUMS.txt
+```
+
 ### 通过 GitHub 仓库地址安装
 
 部分 Agent 可以读取或安装 GitHub 仓库，但这不是所有平台的通用能力。只有在平台明确支持“从仓库／URL安装 Skill”或能够克隆仓库时，才适合直接发送仓库地址。
@@ -111,6 +123,7 @@ blackboard-design-skill/
 ├── dist/
 ├── docs/
 ├── evals/
+├── maintainers/
 ├── tests/
 ├── tools/
 ├── BRAND.md
@@ -123,13 +136,14 @@ blackboard-design-skill/
 ## 验证与构建
 
 ```bash
+python3 tools/build_portable.py --check
 python3 tools/validate_package.py
 python3 -m unittest discover -s tests
-python3 tools/build_portable.py
 python3 tools/build_release.py
+python3 tools/build_checksums.py
 ```
 
-CI 还会运行 Agent Skills 官方参考验证器、YAML 解析、版本一致性、敏感信息和图片文件检查，并分别验证标准包与教师完整单文件。
+CI 会运行 Agent Skills 官方参考验证器、YAML 解析、版本一致性、敏感信息、批准图片和发行契约检查，并分别验证标准包与教师完整单文件。`main` 分支中的 `VERSION` 变化会触发受控 Release 工作流，生成版本标签、发布说明、发行附件与 SHA-256 校验文件。
 
 ## 贡献
 

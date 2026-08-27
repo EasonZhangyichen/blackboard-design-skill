@@ -86,6 +86,7 @@ class PublicReleaseContractTests(unittest.TestCase):
         )
         self.assertIn("Agent Skills", frontmatter["compatibility"])
         self.assertLessEqual(len(str(frontmatter["description"])), 1024)
+        self.assertLessEqual(len(str(frontmatter["compatibility"])), 500)
         self.assertTrue(all(isinstance(value, str) for value in frontmatter["metadata"].values()))
         skill_text = skill.read_text(encoding="utf-8")
         self.assertGreater(len(skill_text.splitlines()), 500)
@@ -98,18 +99,18 @@ class PublicReleaseContractTests(unittest.TestCase):
         self.assertIn("不要求所有平台或模型使用某个指定图片模型", skill_text)
         self.assertIn("学生姓名", skill_text)
 
-    def test_portable_and_standard_release_are_generated(self) -> None:
-        subprocess.run(["python3", "tools/build_portable.py"], cwd=ROOT, check=True)
+    def test_single_file_and_standard_release_are_generated(self) -> None:
+        subprocess.run(["python3", "tools/build_portable.py", "--check"], cwd=ROOT, check=True)
         subprocess.run(["python3", "tools/build_release.py"], cwd=ROOT, check=True)
 
         version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
-        portable = ROOT / "dist" / f"blackboard-design-skill-v{version}.md"
+        single_file = ROOT / "dist" / f"blackboard-design-skill-v{version}.md"
         archive = ROOT / "dist" / f"blackboard-design-skill-v{version}.zip"
-        portable_text = portable.read_text(encoding="utf-8")
-        portable_frontmatter = read_frontmatter(portable)
+        single_file_text = single_file.read_text(encoding="utf-8")
+        single_file_frontmatter = read_frontmatter(single_file)
 
-        self.assertEqual(portable_frontmatter["name"], SKILL_NAME)
-        self.assertEqual(portable_text, (ROOT / "SKILL.md").read_text(encoding="utf-8"))
+        self.assertEqual(single_file_frontmatter["name"], SKILL_NAME)
+        self.assertEqual(single_file_text, (ROOT / "SKILL.md").read_text(encoding="utf-8"))
 
         with ZipFile(archive) as release:
             names = release.namelist()
@@ -121,6 +122,20 @@ class PublicReleaseContractTests(unittest.TestCase):
                 f"{SKILL_NAME}/agents/openai.yaml",
             ],
         )
+
+    def test_release_checksums_match_assets(self) -> None:
+        subprocess.run(["python3", "tools/build_release.py"], cwd=ROOT, check=True)
+        subprocess.run(["python3", "tools/build_checksums.py"], cwd=ROOT, check=True)
+
+        version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+        assets = (
+            ROOT / "dist" / f"blackboard-design-skill-v{version}.md",
+            ROOT / "dist" / f"blackboard-design-skill-v{version}.zip",
+            ROOT / "dist" / "WEB-QUICK-PROMPT.md",
+        )
+        expected = [f"{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}" for path in assets]
+        actual = (ROOT / "dist" / "SHA256SUMS.txt").read_text(encoding="utf-8").splitlines()
+        self.assertEqual(actual, expected)
 
     def test_public_project_files_exist(self) -> None:
         required = (
@@ -135,6 +150,7 @@ class PublicReleaseContractTests(unittest.TestCase):
             ".github/ISSUE_TEMPLATE/feature_request.yml",
             ".github/PULL_REQUEST_TEMPLATE.md",
             ".github/workflows/validate.yml",
+            ".github/workflows/release.yml",
         )
         for relative in required:
             self.assertTrue((ROOT / relative).is_file(), relative)
