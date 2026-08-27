@@ -4,6 +4,12 @@
 
 当前版本：**v0.7.2｜公开发布工程加固版（Public Release Candidate）**。项目仍处于公开测试阶段。
 
+## 公众号
+
+<img src="assets/wechat-official-account.jpg" alt="奕思 Geek&Chalk 微信公众号二维码" width="220">
+
+项目使用意见与反馈，可在公众号留言。
+
 ## 核心能力
 
 - 将主题、固定标题和学校要求转译为适合当前学段的育人命题；
@@ -100,6 +106,7 @@
 ```text
 blackboard-design-skill/
 ├── SKILL.md
+├── assets/
 ├── references/
 ├── agents/openai.yaml
 ├── dist/
