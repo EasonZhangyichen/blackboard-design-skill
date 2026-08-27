@@ -61,6 +61,10 @@ def fail(message: str) -> None:
     raise AssertionError(message)
 
 
+def current_version() -> str:
+    return (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+
+
 def parse_frontmatter(path: Path) -> tuple[dict[str, object], str]:
     text = path.read_text(encoding="utf-8")
     parts = text.split("---", 2)
@@ -82,7 +86,7 @@ def repository_files() -> list[Path]:
 
 
 def validate_metadata() -> None:
-    version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+    version = current_version()
     metadata, skill_text = parse_frontmatter(ROOT / "SKILL.md")
     if metadata.get("name") != SKILL_NAME:
         fail(f"Skill name must be {SKILL_NAME}")
@@ -160,7 +164,7 @@ def validate_repository_hygiene() -> None:
 
 
 def validate_generated_files() -> None:
-    version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+    version = current_version()
     result = subprocess.run(
         [sys.executable, "tools/build_portable.py"],
         cwd=ROOT,
@@ -191,7 +195,7 @@ def validate_generated_files() -> None:
     )
     if release_result.returncode:
         fail("Standard release archive could not be built")
-    archive_path = ROOT / "dist" / f"{SKILL_NAME}-v{version()}.zip"
+    archive_path = ROOT / "dist" / f"{SKILL_NAME}-v{version}.zip"
     allowed = {"SKILL.md", "LICENSE", "references", "agents"}
     with ZipFile(archive_path) as archive:
         names = archive.namelist()
