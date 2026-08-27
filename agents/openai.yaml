@@ -1,0 +1,8 @@
+interface:
+  display_name: "奕思 Geek&Chalk｜黑板报整图生成"
+  short_description: "为中国大陆小初高教师生成育人导向、字图共生、可落地的黑板报整图方案"
+  brand_color: "#173B68"
+  default_prompt: "使用本 Skill，按照学段、主题和板面载体生成 A、B、C 三套完整黑板报方案。"
+
+policy:
+  allow_implicit_invocation: true

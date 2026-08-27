@@ -1,0 +1,31 @@
+name: Feature request
+description: 提议一个与黑板报设计工作流有关的改进
+title: "[Feature] "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 使用问题
+      description: 说明当前工作流中遇到的具体问题。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议方案
+      description: 说明希望新增或调整的行为，以及适用的学段或载体。
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 已尝试的方法
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: 范围确认
+      options:
+        - label: 该建议与黑板报设计、生成、修改或发布包直接相关。
+          required: true

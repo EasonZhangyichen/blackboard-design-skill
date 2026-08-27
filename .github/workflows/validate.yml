@@ -1,0 +1,61 @@
+name: Validate
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install validation dependencies
+        run: python -m pip install "PyYAML>=6,<7"
+
+      - name: Build Portable distribution
+        run: python tools/build_portable.py
+
+      - name: Confirm committed Portable distribution is current
+        run: git diff --exit-code -- "dist/blackboard-design-skill-portable-v$(cat VERSION).md"
+
+      - name: Run repository validator
+        run: python tools/validate_package.py
+
+      - name: Run release contract tests
+        run: python -m unittest discover -s tests
+
+      - name: Build standard release archive
+        run: python tools/build_release.py
+
+      - name: Check out Agent Skills reference validator
+        uses: actions/checkout@v4
+        with:
+          repository: agentskills/agentskills
+          ref: 69ef37e9424c0a7ea9dd2293b559e43ec8176379
+          path: .agent-skills-reference
+
+      - name: Install Agent Skills reference validator
+        run: python -m pip install -e .agent-skills-reference/skills-ref
+
+      - name: Validate standard release with skills-ref
+        run: |
+          mkdir -p .release-check
+          python -m zipfile -e "dist/blackboard-design-skill-v$(cat VERSION).zip" .release-check
+          skills-ref validate .release-check/blackboard-design-skill
+
+      - name: Validate Portable single-file Skill with skills-ref
+        run: |
+          mkdir -p .portable-check/blackboard-design-skill
+          cp "dist/blackboard-design-skill-portable-v$(cat VERSION).md" \
+             .portable-check/blackboard-design-skill/SKILL.md
+          skills-ref validate .portable-check/blackboard-design-skill

@@ -1,4 +1,4 @@
-version: "0.7.1"
+version: "0.7.2"
 suite: "跨学段主题兼容与柔性图像语法"
 cases:
   - id: primary-2-spring-softboard

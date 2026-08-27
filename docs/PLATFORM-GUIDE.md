@@ -1,128 +1,45 @@
 # 平台适配指南
 
-## 1. 先区分三件事
+最后核验：2026-08-27
 
-1. **Skill 格式兼容**：平台能否读取 `SKILL.md`；
-2. **图片工具可用**：平台是否真正具备文生图、参考生图或图片编辑工具；
-3. **最终画质**：取决于规划模型、图片模型、提示遵循、中文渲染与长宽比能力。
+## 判断顺序
 
-因此，“支持本 Skill”不等于所有平台会生成完全相同的图片。
+使用本 Skill 时依次确认：
 
-## 2. Codex
+1. 平台能否读取 `SKILL.md` 或 Portable 单文件；
+2. 当前会话是否真正提供图片生成或编辑工具；
+3. 工具实际调用的图像模型是否满足中文、构图和长宽比要求。
 
-### 推荐方式
+三者相互独立。平台兼容 Agent Skills，不代表当前会话一定能够成图；不同图像模型也不会产生完全相同的画质。
 
-- 把完整目录作为项目打开；或把 `SKILL.md` 安装到 Codex Skill 目录；
-- 确认当前环境存在图片生成工具；
-- 让 Codex顺序生成 A、B、C 三案，核验文件名和文字真值稿。
+## Agent 平台
 
-### 适合原因
+Codex、Claude Code、TRAE、WorkBuddy / CodeBuddy 等平台可根据各自机制导入 Skill。建议使用标准发布 ZIP 或完整目录。
 
-Codex适合完成多步骤规划、文件管理、顺序生图、重命名和局部修改。当前作者实测中，整体理解、提问准确性和构图质量较稳定。
+- 当前有图片工具：顺序生成A、B、C三案，并检查文件和文字。
+- 当前没有图片工具：输出三案简报与自包含提示词，再交给可用图片工具。
+- 图片生成可以来自内置能力、MCP、连接器或外部 API；具体方案由使用者选择。
 
-官方参考：
+### 关于 GPT Image 2
 
-- OpenAI Developers：<https://developers.openai.com/>
-- GPT Image 2：<https://developers.openai.com/api/docs/models/gpt-image-2>
+GPT Image 2 是可选的图像生成与编辑模型，不是本 Skill 的运行依赖，也不是 WorkBuddy / CodeBuddy 或其他平台的强制配置。若使用者希望接入它，应通过宿主支持的图片工具、MCP、连接器或 API 调用；不要把“能够读取 Skill”和“已经配置该图像模型”混为一件事。
 
-## 3. WorkBuddy / CodeBuddy
+## 网页产品
 
-### Skill 安装
+千问、豆包、Kimi 等网页产品可在支持文件上传时使用 Portable 单文件，或复制 `dist/WEB-QUICK-PROMPT.md`。使用前应先进入产品当前可用的图片生成入口。若只有文字对话，则只能完成策划和提示词。
 
-CodeBuddy 官方 Skills 结构以 `SKILL.md` 为核心，可以放在项目级 `.codebuddy/skills/` 或用户级 Skill 目录。WorkBuddy / CodeBuddy 也支持 MCP 与自定义模型。
+## 选择建议
 
-### 推荐配置
+选择平台或模型时，重点检查：
 
-- 规划环节选择较强的推理或通用模型；
-- 关闭容易造成不可控路由的 Auto 模式，或至少核对最终调用的图片模型；
-- 三案逐张生成，不并行；
-- 追求更高出图质量时，通过 MCP、连接器或 API 工具封装接入真正的图像生成模型。
+- 超宽画布或宽板构图能力；
+- 多行中文的可读性；
+- 参考图与局部编辑能力；
+- 是否能连续完成三案并保留独立文件；
+- 数据与隐私条款是否适合学校材料。
 
-### GPT Image 2 的正确接入理解
+无论使用哪个平台，图中文字都以独立文字真值稿为最终抄写依据。
 
-GPT Image 2 提供图像生成与图像编辑端点。WorkBuddy 的普通自定义聊天模型配置通常面向 `/chat/completions`，不应简单把 GPT Image 2 当作普通聊天模型。更稳妥的方式是：
+## 独立项目声明
 
-1. 创建或安装一个图片生成 MCP / connector；
-2. 在工具内部调用 OpenAI `gpt-image-2` 的图像生成或编辑接口；
-3. 将该能力暴露给 WorkBuddy Agent；
-4. 由黑板报 Skill 负责策划和提示词，图片工具负责真正成图。
-
-官方参考：
-
-- WorkBuddy / CodeBuddy Skills：<https://www.workbuddy.ai/docs/zh/ide/Features/Skills>
-- WorkBuddy 模型配置：<https://www.workbuddy.ai/docs/workbuddy/From-Beginner-to-Expert-Guide/Function-Description/Model>
-- CodeBuddy MCP：<https://www.workbuddy.ai/docs/zh/ide/User-guide/MCP>
-- GPT Image 2：<https://developers.openai.com/api/docs/models/gpt-image-2>
-
-## 4. 千问办公 / 千问工作台
-
-### 推荐方式
-
-- 在具备多模态生成或图片生成能力的工作台中使用；
-- 能上传文件时上传 `SKILL.md`；
-- 不能上传时，使用 `dist/WEB-QUICK-PROMPT.md`；
-- 明确要求超宽真实黑板、中文真值稿和顺序生成三案。
-
-千问办公官方定位为整合多模态生成的一站式生产力平台。Qwen Image 系列对复杂布局、多行文字和中文渲染较有优势。作者实测中，千问工作台整体结果可用。
-
-官方参考：
-
-- 千问办公：<https://help.aliyun.com/zh/qwenwork/>
-- Qwen Image：<https://help.aliyun.com/zh/model-studio/qwen-image>
-- 千问文生图：<https://help.aliyun.com/zh/model-studio/text-to-image>
-
-## 5. 豆包工作模式
-
-### 推荐方式
-
-- 当前工作模式必须具备图片生成能力；
-- 若能选择图像模型，优先使用较新的 Seedream / 豆包图像创作能力；
-- 若只支持文本对话，使用快速提示词生成设计简报，再切换图片入口；
-- 每轮成图后继续使用 Skill 的三项反馈闭环进行局部修改。
-
-作者实测豆包工作模式可以完成此类任务，但产品入口、路由模型与权限可能随版本变化，因此 README 只宣称“可用”，不保证与 Codex 或千问获得相同画质。
-
-官方参考：
-
-- 火山引擎豆包图像创作能力：<https://www.volcengine.com/sem>
-
-## 6. TRAE
-
-TRAE 可使用 `SKILL.md` 形式的 Skill。建议导入完整目录；实际成图能力取决于当前 Agent 是否配置图片工具、MCP 或外部 API。
-
-- 有图片工具：执行完整三案；
-- 没有图片工具：进入策划模式；
-- 若使用外部图片 API，应把它封装成可调用工具，而不是要求语言模型自行“想象已生成”。
-
-官方 Skill 页面：<https://docs.trae.ai/ide/skills?_lang=zh>
-
-## 7. Claude Code
-
-Claude Code 可以加载 Skill；但整图生成通常需要额外 MCP 或外部图像工具。将 Skill 与图像工具分开理解：
-
-- Skill 负责领域知识、流程和图像提示；
-- MCP / API 工具负责图片生成与编辑。
-
-## 8. Kimi / Kimi Code
-
-- 支持 Skill 或文件读取时使用 `SKILL.md`；
-- 网页端需要先启用图片插件或进入图片生成入口；
-- 无图片工具时使用策划模式或快速提示词。
-
-## 9. 推荐等级
-
-### 完整体验
-
-- Codex + 可用图片工具
-- 强 Agent + GPT Image 2 / Qwen Image / Seedream 等实际图片工具
-
-### 低门槛可用
-
-- 千问办公 / 千问工作台图片能力
-- 豆包工作模式图片能力
-- WorkBuddy 内置图片路由
-
-### 条件支持
-
-- TRAE、Claude Code、Kimi Code：需要确认图片工具或 MCP
-- 普通网页聊天：需要手动切换图片模式
+本项目与 OpenAI、腾讯、阿里云、字节跳动、Anthropic、TRAE 及其他文中提及的平台或模型提供方不存在官方隶属、合作或背书关系。

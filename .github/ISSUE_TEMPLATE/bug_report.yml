@@ -1,0 +1,48 @@
+name: Bug report
+description: 报告 Skill 行为、文档或发布包中的可复现问题
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: 请勿上传学生隐私、密钥或未获授权的学校材料。
+  - type: input
+    id: version
+    attributes:
+      label: 版本
+      placeholder: 例如 0.7.2
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: 使用场景
+      description: 请说明平台、学段、主题、载体，以及图片工具是否可用。
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期结果
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现步骤
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: 隐私确认
+      options:
+        - label: 我已移除学生个人信息、密钥和未获授权的材料。
+          required: true

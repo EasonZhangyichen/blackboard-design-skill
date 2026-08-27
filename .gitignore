@@ -13,5 +13,6 @@ __pycache__/
 outputs/
 tmp/
 
-# Built release archives
+# Generated release artifacts
 dist/*.zip
+dist/blackboard-design-skill-portable-v*.md
