@@ -10,7 +10,7 @@
 
 1. 从 `main` 创建独立分支。
 2. 保持修改范围清楚，不混入无关重构。
-3. 修改运行逻辑时同步更新 `SKILL.md` 或对应 `references/`，并在 `evals/test-cases.yaml` 补充场景，在 `evals/rubric.md` 记录评测标准；评测结果应说明用例、得分、失败项和使用的平台能力。
+3. 修改运行逻辑时只更新根目录 `SKILL.md`，并在 `evals/test-cases.yaml` 补充场景，在 `evals/rubric.md` 记录评测标准；评测结果应说明用例、得分、失败项和使用的平台能力。
 4. 运行：
 
    ```bash
@@ -22,4 +22,4 @@
 
 5. 提交 Pull Request，说明动机、变更和验证结果。
 
-`dist/blackboard-design-skill-portable-*.md` 与发布 ZIP 是生成物，不应手工修改或提交到源码分支。正式 Release 由维护者从同一套标准源码构建并附加这些产物。
+`dist/blackboard-design-skill-v*.md` 是由根目录 `SKILL.md` 生成的教师完整单文件，不应手工修改。发布 ZIP 同样由构建脚本生成，不提交到源码分支。正式 Release 由维护者从同一运行真源构建并附加这些产物。

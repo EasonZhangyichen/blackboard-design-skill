@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+## [0.7.3] - 2026-08-27
+
+- 恢复经真实测试表现稳定的 v0.7.1 完整自包含运行正文，不再要求运行前读取 `references/`。
+- 保留 v0.7.2 的开源工程、品牌、MIT License、CI、社区文档和 Release 架构。
+- 跨平台小学、初中和高中实测显示，模块化运行可能出现内容减少、构图模块化和结果海报化，因此重新以完整单文件作为唯一运行真源。
+- 教师单文件与根目录 `SKILL.md` 完全一致；标准 ZIP 使用同一运行文件，只附带许可证和 OpenAI 展示配置。
+- 保留跨学段主题、唯一文件命名、能力握手、图片模型不绑定、真实宽板、二轮反馈、重路由、隐私与事实准确性规则。
+
 ## [0.7.2] - 2026-08-27
 
 - 将标准 Skill 名称统一为 `blackboard-design-skill`，补齐 MIT、版本、仓库和维护者元数据。
@@ -29,7 +37,8 @@
 
 - 建立单文件自包含、载体路由、唯一文件名和学段切换重路由。
 
-[Unreleased]: https://github.com/EasonZhangyichen/blackboard-design-skill/compare/v0.7.2...HEAD
+[Unreleased]: https://github.com/EasonZhangyichen/blackboard-design-skill/compare/v0.7.3...HEAD
+[0.7.3]: https://github.com/EasonZhangyichen/blackboard-design-skill/compare/v0.7.2...v0.7.3
 [0.7.2]: https://github.com/EasonZhangyichen/blackboard-design-skill/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/EasonZhangyichen/blackboard-design-skill/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/EasonZhangyichen/blackboard-design-skill/releases/tag/v0.7.0
