@@ -137,6 +137,15 @@ class PublicReleaseContractTests(unittest.TestCase):
         actual = (ROOT / "dist" / "SHA256SUMS.txt").read_text(encoding="utf-8").splitlines()
         self.assertEqual(actual, expected)
 
+    def test_release_notes_are_well_formed(self) -> None:
+        subprocess.run(["python3", "tools/build_release_notes.py"], cwd=ROOT, check=True)
+        version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+        notes = (ROOT / "dist" / "RELEASE_NOTES.md").read_text(encoding="utf-8")
+        self.assertTrue(notes.startswith(f"# Blackboard Design Skill v{version}\n"))
+        self.assertIn(f"## [{version}]", notes)
+        self.assertIn("## 下载建议", notes)
+        self.assertFalse(any(line.startswith("    ") for line in notes.splitlines() if line.strip()))
+
     def test_public_project_files_exist(self) -> None:
         required = (
             "BRAND.md",
@@ -145,6 +154,7 @@ class PublicReleaseContractTests(unittest.TestCase):
             "PRIVACY.md",
             "CODE_OF_CONDUCT.md",
             "agents/openai.yaml",
+            "tools/build_release_notes.py",
             ".github/CODEOWNERS",
             ".github/ISSUE_TEMPLATE/bug_report.yml",
             ".github/ISSUE_TEMPLATE/feature_request.yml",

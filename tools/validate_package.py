@@ -219,6 +219,21 @@ def validate_generated_files() -> None:
     if actual_lines != expected_lines:
         fail("SHA256SUMS.txt does not match the release assets")
 
+    notes_result = subprocess.run(
+        [sys.executable, "tools/build_release_notes.py"],
+        cwd=ROOT,
+        check=False,
+    )
+    if notes_result.returncode:
+        fail("Release notes could not be built")
+    notes = (ROOT / "dist" / "RELEASE_NOTES.md").read_text(encoding="utf-8")
+    if not notes.startswith(f"# Blackboard Design Skill v{version}\n"):
+        fail("Release notes have an invalid title")
+    if f"## [{version}]" not in notes or "## 下载建议" not in notes:
+        fail("Release notes are missing the current changelog or download guidance")
+    if any(line.startswith("    ") for line in notes.splitlines() if line.strip()):
+        fail("Release notes contain unintended Markdown code-block indentation")
+
 
 def main() -> int:
     try:
