@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 import re
 import subprocess
@@ -22,6 +23,9 @@ REFERENCES = {
 }
 TEXT_SUFFIXES = {".md", ".py", ".yaml", ".yml", ".txt", ".toml", ""}
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".svg"}
+APPROVED_IMAGES = {
+    "assets/wechat-official-account.jpg": "1fcdab09d012580b4a6923d12cc7590346d745c039615ce9641145064d02a2d9",
+}
 CORE_MARKERS = (
     "用尽可能少的问题",
     "required_focus",
@@ -146,9 +150,20 @@ def validate_repository_hygiene() -> None:
     env_files = [path for path in files if path.name == ".env" or path.name.startswith(".env.")]
     if env_files:
         fail("Environment files are not allowed")
-    images = [path for path in files if path.suffix.lower() in IMAGE_SUFFIXES]
-    if images:
-        fail("Image files are not allowed in this release candidate")
+    images = {
+        path.relative_to(ROOT).as_posix(): path
+        for path in files
+        if path.suffix.lower() in IMAGE_SUFFIXES
+    }
+    unexpected_images = sorted(set(images) - set(APPROVED_IMAGES))
+    if unexpected_images:
+        fail(f"Unapproved image file found: {unexpected_images[0]}")
+    for relative, expected_sha256 in APPROVED_IMAGES.items():
+        image = images.get(relative)
+        if image is None:
+            fail(f"Approved image file is missing: {relative}")
+        if hashlib.sha256(image.read_bytes()).hexdigest() != expected_sha256:
+            fail(f"Approved image file has changed: {relative}")
 
     for path in files:
         if path == Path(__file__).resolve() or path.suffix.lower() not in TEXT_SUFFIXES:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 import subprocess
 import unittest
@@ -10,6 +11,8 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL_NAME = "blackboard-design-skill"
+BRAND_ASSET = "assets/wechat-official-account.jpg"
+BRAND_ASSET_SHA256 = "1fcdab09d012580b4a6923d12cc7590346d745c039615ce9641145064d02a2d9"
 REFERENCE_FILES = (
     "pedagogy-and-stages.md",
     "image-grammar.md",
@@ -127,6 +130,31 @@ class PublicReleaseContractTests(unittest.TestCase):
         )
         for relative in required:
             self.assertTrue((ROOT / relative).is_file(), relative)
+
+    def test_official_account_brand_entry_is_exact_and_documented(self) -> None:
+        asset = ROOT / BRAND_ASSET
+        self.assertTrue(asset.is_file(), BRAND_ASSET)
+        self.assertEqual(hashlib.sha256(asset.read_bytes()).hexdigest(), BRAND_ASSET_SHA256)
+
+        for relative in ("README.md", "BRAND.md"):
+            text = (ROOT / relative).read_text(encoding="utf-8")
+            self.assertIn(BRAND_ASSET, text)
+            self.assertIn("公众号留言", text)
+
+        code_of_conduct = (ROOT / "CODE_OF_CONDUCT.md").read_text(encoding="utf-8")
+        self.assertNotIn("GitHub 私信", code_of_conduct)
+        self.assertIn("公众号留言", code_of_conduct)
+
+        security = (ROOT / "SECURITY.md").read_text(encoding="utf-8")
+        self.assertIn("README 或 BRAND.md 中的公众号", security)
+        self.assertIn("不要在公众号留言中提交", security)
+
+        subprocess.run(["python3", "tools/build_release.py"], cwd=ROOT, check=True)
+        version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+        archive = ROOT / "dist" / f"blackboard-design-skill-v{version}.zip"
+        with ZipFile(archive) as release:
+            names = release.namelist()
+        self.assertFalse(any("wechat-official-account" in name for name in names))
 
 
 if __name__ == "__main__":
