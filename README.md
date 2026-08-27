@@ -32,15 +32,26 @@
 
 三案共享主题、育人命题与文字核心，差异不是简单换色或换边框。
 
+## 普通教师最简单的使用方式
+
+多数教师不需要学习 GitHub，也不需要理解仓库结构。
+
+1. 下载 `blackboard-design-skill-portable-v0.7.2.md`；
+2. 把这个文件上传到 Codex、WorkBuddy、千问工作台、豆包、Kimi 或其他支持文件读取的 AI；
+3. 告诉 AI：“请加载这个黑板报 Skill，并为〔学段〕设计〔主题〕黑板报，板面采用〔传统黑板／黑板加剪贴／软板〕。”
+4. 当前会话需要具备图片生成能力；只有文字能力时，Skill 会输出完整方案与生图提示词。
+
+**不要把根目录185行的 `SKILL.md` 单独发给只支持单文件的平台。**它是标准目录包的入口，需要同时读取 `references/`。单文件传播应使用 Portable 文件。
+
 ## 快速开始
 
 ### 标准 Agent Skill 包
 
-从 [Releases](https://github.com/EasonZhangyichen/blackboard-design-skill/releases) 下载 `blackboard-design-skill-v0.7.2.zip`，导入支持 Agent Skills 的平台。
+从 [Releases](https://github.com/EasonZhangyichen/blackboard-design-skill/releases) 下载 `blackboard-design-skill-v0.7.2.zip`，导入支持 Agent Skills 目录或 ZIP 的平台。标准 ZIP 包含主 `SKILL.md`、四份专业参考规则、许可证和 OpenAI 展示配置。
 
 ### Portable 单文件
 
-下载 `blackboard-design-skill-portable-v0.7.2.md`。它由标准版自动构建，适合只能上传一个文件的平台。
+下载 `blackboard-design-skill-portable-v0.7.2.md`。它由标准版自动构建，已经内嵌全部专业规则，适合只能上传一个文件的平台，也是面向普通教师的首选传播物。
 
 ### 网页图片模式
 
@@ -49,6 +60,17 @@
 示例：
 
 > 使用黑板报 Skill，为高一设计“古韵传薪火 经典启新思”主题黑板报，采用传统手绘黑板，一键生成。
+
+### 通过 GitHub 仓库地址安装
+
+部分 Agent 可以读取或安装 GitHub 仓库，但这不是所有平台的通用能力。只有在平台明确支持“从仓库／URL安装 Skill”或能够克隆仓库时，才适合直接发送仓库地址。
+
+- 支持仓库安装：可让 Agent 读取仓库根目录 `SKILL.md` 与 `references/`；
+- 只支持上传文件：使用 Portable 单文件；
+- 支持 ZIP 导入：使用标准 Release ZIP；
+- 普通网页聊天：先进入图片生成模式，再使用 Portable 或网页快速提示词。
+
+不要只发送仓库首页并假设所有 AI 都会递归读取、安装和启用图片工具。
 
 ## 平台适配
 
@@ -101,7 +123,7 @@ python3 tools/build_portable.py
 python3 tools/build_release.py
 ```
 
-CI 还会运行 Agent Skills 官方参考验证器、YAML 解析、版本一致性、敏感信息和图片文件检查。
+CI 还会运行 Agent Skills 官方参考验证器、YAML 解析、版本一致性、敏感信息和图片文件检查，并分别验证标准包与 Portable 单文件。
 
 ## 贡献
 

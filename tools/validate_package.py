@@ -49,6 +49,12 @@ CORE_MARKERS = (
     "准确性、版权与符号",
     "交付前质量门",
 )
+PORTABLE_ANCHORS = (
+    "portable-reference-pedagogy-and-stages",
+    "portable-reference-image-grammar",
+    "portable-reference-generation-protocol",
+    "portable-reference-writing-and-compliance",
+)
 
 
 def fail(message: str) -> None:
@@ -59,10 +65,10 @@ def parse_frontmatter(path: Path) -> tuple[dict[str, object], str]:
     text = path.read_text(encoding="utf-8")
     parts = text.split("---", 2)
     if len(parts) != 3 or parts[0].strip():
-        fail("SKILL.md must begin with YAML frontmatter")
+        fail(f"{path.name} must begin with YAML frontmatter")
     data = yaml.safe_load(parts[1])
     if not isinstance(data, dict):
-        fail("SKILL.md frontmatter must be a mapping")
+        fail(f"{path.name} frontmatter must be a mapping")
     return data, text
 
 
@@ -92,6 +98,8 @@ def validate_metadata() -> None:
         fail("VERSION and Skill metadata version differ")
     if len(skill_text.splitlines()) > 500:
         fail("SKILL.md exceeds 500 lines")
+    if "## 参考文件加载规则" not in skill_text:
+        fail("SKILL.md is missing the mandatory reference loading rule")
 
     references = ROOT / "references"
     actual = {path.name for path in references.iterdir() if path.is_file()}
@@ -154,14 +162,24 @@ def validate_repository_hygiene() -> None:
 def validate_generated_files() -> None:
     version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
     result = subprocess.run(
-        [sys.executable, "tools/build_portable.py", "--check"],
+        [sys.executable, "tools/build_portable.py"],
         cwd=ROOT,
         check=False,
     )
     if result.returncode:
-        fail("Portable distribution is stale")
+        fail("Portable distribution could not be built")
+
     portable = ROOT / "dist" / f"blackboard-design-skill-portable-v{version}.md"
-    portable_text = portable.read_text(encoding="utf-8")
+    portable_metadata, portable_text = parse_frontmatter(portable)
+    if portable_metadata.get("name") != SKILL_NAME:
+        fail("Portable Skill name is invalid")
+    if "Portable 单文件说明" not in portable_text:
+        fail("Portable distribution is missing its embedded-reference notice")
+    if "(references/" in portable_text:
+        fail("Portable distribution still contains external reference links")
+    for anchor in PORTABLE_ANCHORS:
+        if f'id="{anchor}"' not in portable_text or f"](#{anchor})" not in portable_text:
+            fail(f"Portable distribution is missing internal reference anchor: {anchor}")
     for marker in CORE_MARKERS:
         if marker not in portable_text:
             fail(f"Portable distribution is missing core rule: {marker}")
@@ -173,7 +191,7 @@ def validate_generated_files() -> None:
     )
     if release_result.returncode:
         fail("Standard release archive could not be built")
-    archive_path = ROOT / "dist" / f"{SKILL_NAME}-v{version}.zip"
+    archive_path = ROOT / "dist" / f"{SKILL_NAME}-v{version()}.zip"
     allowed = {"SKILL.md", "LICENSE", "references", "agents"}
     with ZipFile(archive_path) as archive:
         names = archive.namelist()

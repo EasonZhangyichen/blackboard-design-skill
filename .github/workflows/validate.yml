@@ -25,6 +25,9 @@ jobs:
       - name: Build Portable distribution
         run: python tools/build_portable.py
 
+      - name: Confirm committed Portable distribution is current
+        run: git diff --exit-code -- "dist/blackboard-design-skill-portable-v$(cat VERSION).md"
+
       - name: Run repository validator
         run: python tools/validate_package.py
 
@@ -49,3 +52,10 @@ jobs:
           mkdir -p .release-check
           python -m zipfile -e "dist/blackboard-design-skill-v$(cat VERSION).zip" .release-check
           skills-ref validate .release-check/blackboard-design-skill
+
+      - name: Validate Portable single-file Skill with skills-ref
+        run: |
+          mkdir -p .portable-check/blackboard-design-skill
+          cp "dist/blackboard-design-skill-portable-v$(cat VERSION).md" \
+             .portable-check/blackboard-design-skill/SKILL.md
+          skills-ref validate .portable-check/blackboard-design-skill

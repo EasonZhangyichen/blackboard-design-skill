@@ -16,6 +16,12 @@ REFERENCE_FILES = (
     "generation-protocol.md",
     "writing-and-compliance.md",
 )
+PORTABLE_ANCHORS = (
+    "portable-reference-pedagogy-and-stages",
+    "portable-reference-image-grammar",
+    "portable-reference-generation-protocol",
+    "portable-reference-writing-and-compliance",
+)
 CORE_MARKERS = (
     "用尽可能少的问题",
     "required_focus",
@@ -47,7 +53,9 @@ CORE_MARKERS = (
 
 def read_frontmatter(path: Path) -> dict[str, object]:
     text = path.read_text(encoding="utf-8")
-    _, raw, _ = text.split("---", 2)
+    prefix, raw, _ = text.split("---", 2)
+    if prefix.strip():
+        raise AssertionError(f"{path} does not begin with YAML frontmatter")
     data = yaml.safe_load(raw)
     if not isinstance(data, dict):
         raise AssertionError(f"Invalid frontmatter in {path}")
@@ -66,9 +74,10 @@ class PublicReleaseContractTests(unittest.TestCase):
         self.assertEqual(frontmatter["metadata"]["version"], version)
         self.assertLessEqual(len(str(frontmatter["description"])), 1024)
         self.assertTrue(all(isinstance(value, str) for value in frontmatter["metadata"].values()))
-        self.assertLessEqual(len(skill.read_text(encoding="utf-8").splitlines()), 500)
-
         skill_text = skill.read_text(encoding="utf-8")
+        self.assertLessEqual(len(skill_text.splitlines()), 500)
+        self.assertIn("## 参考文件加载规则", skill_text)
+
         for filename in REFERENCE_FILES:
             reference = ROOT / "references" / filename
             self.assertTrue(reference.is_file(), filename)
@@ -82,6 +91,14 @@ class PublicReleaseContractTests(unittest.TestCase):
         portable = ROOT / "dist" / f"blackboard-design-skill-portable-v{version}.md"
         archive = ROOT / "dist" / f"blackboard-design-skill-v{version}.zip"
         portable_text = portable.read_text(encoding="utf-8")
+        portable_frontmatter = read_frontmatter(portable)
+
+        self.assertEqual(portable_frontmatter["name"], SKILL_NAME)
+        self.assertIn("Portable 单文件说明", portable_text)
+        self.assertNotIn("(references/", portable_text)
+        for anchor in PORTABLE_ANCHORS:
+            self.assertIn(f'id="{anchor}"', portable_text)
+            self.assertIn(f"](#{anchor})", portable_text)
         for marker in CORE_MARKERS:
             self.assertIn(marker, portable_text)
 

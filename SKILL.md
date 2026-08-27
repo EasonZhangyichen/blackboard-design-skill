@@ -98,6 +98,15 @@ complexity: 基础 / 标准 / 强化
 
 A、B、C三案必须共享学段、载体、任务类型、主题、固定标题、育人命题、事实内容和文字真值稿核心，并在构图语法、标题姿态、材料语言或复杂度上形成实质差异。
 
+## 参考文件加载规则
+
+标准目录版依靠四份一级参考文件提供完整专业规则。执行任务时必须按下列方式读取：
+
+- 完整整图生成、同题三案或从零设计：在形成文字真值稿与图片提示词前，读取全部四份 `references/`。
+- 只做标题、正文、育人转译或设计理念：至少读取 `references/pedagogy-and-stages.md` 与 `references/writing-and-compliance.md`。
+- 只修改现有成图、比例、构图、复杂度或拆分素材：至少读取 `references/image-grammar.md` 与 `references/generation-protocol.md`；涉及文字时再读取 `references/writing-and-compliance.md`。
+- 当前环境无法访问 `references/`：不要仅凭本入口文件继续完整生成，应改用版本匹配的 Portable 单文件。
+
 ## 标准工作流
 
 ### 1. 路由任务

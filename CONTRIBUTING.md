@@ -14,11 +14,12 @@
 4. 运行：
 
    ```bash
+   python3 tools/build_portable.py
    python3 tools/validate_package.py
    python3 -m unittest discover -s tests
-   python3 tools/build_portable.py --check
+   python3 tools/build_release.py
    ```
 
 5. 提交 Pull Request，说明动机、变更和验证结果。
 
-`dist/blackboard-design-skill-portable-*.md` 与发布 ZIP 是生成物，不应手工修改。维护者负责版本、发布包、标签和 Release。
+`dist/blackboard-design-skill-portable-*.md` 与发布 ZIP 是生成物，不应手工修改或提交到源码分支。正式 Release 由维护者从同一套标准源码构建并附加这些产物。
